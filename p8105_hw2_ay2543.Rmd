@@ -149,12 +149,9 @@ First, I loaded the pols dataset, then used `separate()` to break up the mon var
 pols = read_csv("./data/pols-month.csv") %>% 
   separate(mon, into = c("year", "month", "day"), sep = "-") %>% 
   mutate(month = lubridate::month(as.numeric(month), label = TRUE, abbr = FALSE),
-         year = as.double(year)) %>% 
-  pivot_longer(c(prez_dem, prez_gop),
-               names_to = "president",
-               names_prefix = "prez_",
-               values_to = "president_value") %>% 
-  select(-day)
+         year = as.numeric(year),
+         president = ifelse(prez_gop == 1, "gop", "dem")) %>% 
+  select(-day, -prez_gop, -prez_dem)
 
 ```
 
@@ -168,7 +165,7 @@ snp = read_csv("./data/snp.csv") %>%
    mutate(date = lubridate::mdy(date)) %>% 
   separate(date, into = c("year", "month", "day"), sep = "-") %>% 
   mutate(month = lubridate::month(as.numeric(month), label = TRUE, abbr = FALSE),
-         year = as.double(year)) %>% 
+         year = as.numeric(year)) %>% 
  select(-day)
 
   
@@ -184,7 +181,7 @@ unemployment = read_csv("./data/unemployment.csv") %>%
                values_to = "unemployment") %>% 
   janitor::clean_names() %>% 
   mutate(month = factor(month, levels = month.abb, labels = month.name, ordered = TRUE),
-         year = as.double(year))
+         year = as.numeric(year))
 ```
 
 
@@ -196,8 +193,6 @@ merge_df = left_join(pols, snp) %>%
   left_join(., unemployment)
 ```
 
-
-Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).
 
 The pols dataset contained **`r nrow(pols)`** observations and **`r ncol(pols)`** variables. The included variables were *`r colnames(pols)`*.
 
